@@ -40,11 +40,11 @@ tuple<int, int, vector<string>> dijkstra(string start, string end, unordered_map
             int edgeDist = neigh.second.first;
             int edgeCost = neigh.second.second;
 
-            if (distance[node] + edgeDist < distance[neighborNode]) {
+            if (distance[node] + edgeDist < distance[neighborNode] ||
+                (distance[node] + edgeDist == distance[neighborNode] && cost[node] + edgeCost < cost[neighborNode])) {
                 distance[neighborNode] = distance[node] + edgeDist;
                 cost[neighborNode] = cost[node] + edgeCost;
                 parent[neighborNode] = node;
-
                 mini.push({distance[neighborNode], neighborNode});
             }
         }
@@ -78,7 +78,7 @@ unordered_map<string, list<pair<string, pair<int, int>>>> buildgraph(vector<vect
             string stop1 = route[0];
             string stop2 = route[1];
             int currdist = stoi(route[2]);        // converting distance into integer form
-            int currcost = stoi(route[3]);    // conveerting cost
+            int currcost = stoi(route[3]);    // converting cost
 
             adjlist[stop1].push_back(make_pair(stop2, make_pair(currdist, currcost)));
             adjlist[stop2].push_back(make_pair(stop1, make_pair(currdist, currcost)));
@@ -113,6 +113,7 @@ int main(){
         
         string stop;
         getline(cin, stop);
+        transform(stop.begin(), stop.end(), stop.begin(), ::tolower);
 
         if(stop == "done"){
             end = true;
@@ -145,6 +146,11 @@ int main(){
                 continue;
             }
 
+            if (addresses[i] == addresses[i + 1]) {
+                cout << "Start and end locations are the same: " << addresses[i] << endl;
+                continue;
+            }
+
             tuple<int, int, vector<string>> travelDetails = dijkstra(addresses[i], addresses[i + 1], adjlist);   // (distance, cost, path)
             
             int pathdistance = get<0>(travelDetails);
@@ -152,7 +158,8 @@ int main(){
             vector<string> path = get<2>(travelDetails);
 
             if(pathdistance == -1){
-                cout<<"unreachable destination"<<endl;
+                cout<<"No path found from "<<addresses[i]<<" to "<<addresses[i + 1]<<endl;
+                continue;
             }
 
             else{ 
